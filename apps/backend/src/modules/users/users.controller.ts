@@ -24,6 +24,11 @@ export class UsersController {
     return this.usersService.getFriends(req.user._id.toString());
   }
 
+  @Get('online')
+  getOnlineUsers(@Req() req: any) {
+    return this.usersService.getOnlineUsers(req.user._id.toString());
+  }
+
   @Get('discover')
   discoverUsers(@Req() req: any) {
     return this.usersService.discoverUsers(req.user._id.toString());

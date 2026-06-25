@@ -38,6 +38,11 @@ export const userApi = {
     return data;
   },
 
+  getOnlineUsers: async (): Promise<User[]> => {
+    const { data } = await apiClient.get<User[]>('/users/online');
+    return data;
+  },
+
   discoverUsers: async (): Promise<(User & { relationshipStatus: 'none' | 'friends' | 'request_sent' | 'request_received' })[]> => {
     const { data } = await apiClient.get('/users/discover');
     return data;

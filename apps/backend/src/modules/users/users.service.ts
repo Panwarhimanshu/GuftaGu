@@ -109,6 +109,13 @@ export class UsersService {
     });
   }
 
+  async getOnlineUsers(currentUserId: string): Promise<any[]> {
+    return this.userModel
+      .find({ _id: { $ne: new Types.ObjectId(currentUserId) }, isOnline: true, isBanned: false })
+      .select('displayName username avatar status isOnline')
+      .lean();
+  }
+
   async discoverUsers(currentUserId: string): Promise<any[]> {
     const currentUser = await this.userModel.findById(currentUserId).lean();
     if (!currentUser) throw new NotFoundException();
