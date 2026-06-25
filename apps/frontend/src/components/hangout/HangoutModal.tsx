@@ -26,7 +26,7 @@ const HANGOUT_META: Record<HangoutType, { emoji: string; label: string; color: s
 type ModalStep = 'create' | 'live';
 
 export function HangoutModal() {
-  const { isOpen, type, activeEvent, close, startHangout, respond } = useHangoutStore();
+  const { isOpen, type, activeEvent, close, startHangout, respond, isCreator } = useHangoutStore();
   const { socket } = useSocket();
   const [step, setStep] = useState<ModalStep>('create');
   const [message, setMessage] = useState('');
@@ -226,32 +226,44 @@ export function HangoutModal() {
                     </div>
                   )}
 
-                  {/* Your response */}
-                  <div>
-                    <p className="text-sm font-semibold mb-3" style={{ color: 'var(--neu-text)' }}>
-                      Are you joining?
-                    </p>
-                    <div className="grid grid-cols-3 gap-3">
-                      {([
-                        { status: 'coming',      icon: CheckCircle2, label: 'Coming!',   color: '#22c55e' },
-                        { status: 'maybe',       icon: HelpCircle,   label: 'Maybe',     color: '#f59e0b' },
-                        { status: 'not_coming',  icon: XCircle,      label: 'Can\'t',    color: '#ef4444' },
-                      ] as const).map(({ status, icon: Icon, label, color }) => (
-                        <button
-                          key={status}
-                          onClick={() => handleRespond(status)}
-                          className="flex flex-col items-center gap-2 p-3 rounded-neu-sm transition-all"
-                          style={{
-                            background: 'var(--neu-bg)',
-                            boxShadow: '3px 3px 6px var(--neu-shadow-1), -3px -3px 6px var(--neu-shadow-2)',
-                          }}
-                        >
-                          <Icon className="w-6 h-6" style={{ color }} />
-                          <span className="text-xs font-semibold" style={{ color }}>{label}</span>
-                        </button>
-                      ))}
+                  {/* Your response / creator badge */}
+                  {isCreator ? (
+                    <div
+                      className="flex items-center justify-center gap-2 p-4 rounded-neu-sm"
+                      style={{ background: '#22c55e18', border: '1px solid #22c55e44' }}
+                    >
+                      <CheckCircle2 className="w-5 h-5" style={{ color: '#22c55e' }} />
+                      <span className="text-sm font-semibold" style={{ color: '#22c55e' }}>
+                        You organized this — you&apos;re going!
+                      </span>
                     </div>
-                  </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm font-semibold mb-3" style={{ color: 'var(--neu-text)' }}>
+                        Are you joining?
+                      </p>
+                      <div className="grid grid-cols-3 gap-3">
+                        {([
+                          { status: 'coming',      icon: CheckCircle2, label: 'Coming!',   color: '#22c55e' },
+                          { status: 'maybe',       icon: HelpCircle,   label: 'Maybe',     color: '#f59e0b' },
+                          { status: 'not_coming',  icon: XCircle,      label: 'Can\'t',    color: '#ef4444' },
+                        ] as const).map(({ status, icon: Icon, label, color }) => (
+                          <button
+                            key={status}
+                            onClick={() => handleRespond(status)}
+                            className="flex flex-col items-center gap-2 p-3 rounded-neu-sm transition-all"
+                            style={{
+                              background: 'var(--neu-bg)',
+                              boxShadow: '3px 3px 6px var(--neu-shadow-1), -3px -3px 6px var(--neu-shadow-2)',
+                            }}
+                          >
+                            <Icon className="w-6 h-6" style={{ color }} />
+                            <span className="text-xs font-semibold" style={{ color }}>{label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Responses */}
                   {[

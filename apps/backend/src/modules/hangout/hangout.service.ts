@@ -42,6 +42,8 @@ export class HangoutService {
       invitedUsers:   dto.invitedUserIds?.map(id => new Types.ObjectId(id)) ?? [],
       expiresAt:      new Date(Date.now() + (dto.expiresInMinutes ?? 30) * 60 * 1000),
       isActive:       true,
+      // Creator is automatically coming
+      responses: [{ userId: new Types.ObjectId(initiatorId), status: 'coming', respondedAt: new Date() }],
     });
 
     // Notify friends
@@ -93,20 +95,9 @@ export class HangoutService {
   }
 
   // ── Get active ────────────────────────────────────────────
-  async getActive(userId: string): Promise<any[]> {
-    const user = await this.userModel.findById(userId).lean();
-    const friendIds = user?.friends ?? [];
-
+  async getActive(_userId: string): Promise<any[]> {
     return this.hangoutModel
-      .find({
-        isActive:  true,
-        expiresAt: { $gt: new Date() },
-        $or: [
-          { initiatorId: new Types.ObjectId(userId) },
-          { initiatorId: { $in: friendIds } },
-          { invitedUsers: new Types.ObjectId(userId) },
-        ],
-      })
+      .find({ isActive: true, expiresAt: { $gt: new Date() } })
       .sort({ createdAt: -1 })
       .populate('initiatorId', 'displayName avatar username status')
       .populate('responses.userId', 'displayName avatar username')
@@ -156,7 +147,11 @@ export class HangoutService {
 
   private async getFriendsToNotify(initiatorId: string, invited?: string[]): Promise<string[]> {
     if (invited?.length) return invited;
-    const user = await this.userModel.findById(initiatorId).lean();
-    return (user?.friends ?? []).map(id => id.toString());
+    // Notify everyone (not just friends) so all users see the hangout
+    const allUsers = await this.userModel
+      .find({ _id: { $ne: new Types.ObjectId(initiatorId) }, isBanned: false })
+      .select('_id')
+      .lean();
+    return allUsers.map((u: any) => u._id.toString());
   }
 }

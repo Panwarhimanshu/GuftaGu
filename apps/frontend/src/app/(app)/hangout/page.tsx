@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Clock, Users, MapPin, X, CheckCircle, Timer } from 'lucide-react';
 import { hangoutApi } from '@/lib/api/hangoutApi';
 import { useHangoutStore } from '@/store/hangoutStore';
+import { useAuthStore } from '@/store/authStore';
 import { Avatar } from '@/components/ui/Avatar';
 import { NeuButton } from '@/components/ui/NeuButton';
 
@@ -21,6 +22,7 @@ const HANGOUT_TYPES = [
 export default function HangoutPage() {
   const qc = useQueryClient();
   const { openHangoutModal } = useHangoutStore();
+  const { user: currentUser } = useAuthStore();
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [duration, setDuration] = useState(15);
@@ -206,6 +208,12 @@ export default function HangoutPage() {
           <div className="space-y-3">
             {activeHangouts.map(hangout => {
               const typeInfo = HANGOUT_TYPES.find(h => h.type === hangout.type);
+              const initiator = (hangout as any).initiatorId;
+              const isOwner = initiator?.id === currentUser?.id || initiator?._id?.toString() === currentUser?.id;
+              const myResponse = hangout.responses?.find(
+                r => (r as any).userId?.id === currentUser?.id || (r as any).userId?._id?.toString() === currentUser?.id
+              );
+
               return (
                 <motion.div
                   key={hangout.id}
@@ -218,11 +226,16 @@ export default function HangoutPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-sm" style={{ color: 'var(--neu-text)' }}>
-                          {(hangout as any).creator?.displayName ?? 'Someone'}
+                          {isOwner ? 'You' : (initiator?.displayName ?? 'Someone')}
                         </span>
                         <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: typeInfo?.color + '22', color: typeInfo?.color }}>
                           {typeInfo?.label}
                         </span>
+                        {isOwner && (
+                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold text-white" style={{ background: 'var(--brand)' }}>
+                            Your hangout
+                          </span>
+                        )}
                       </div>
                       {hangout.message && (
                         <p className="text-sm mt-0.5" style={{ color: 'var(--neu-text-muted)' }}>{hangout.message}</p>
@@ -237,35 +250,57 @@ export default function HangoutPage() {
                           </span>
                         )}
                         <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3" /> {hangout.responses?.length ?? 0} joined
+                          <Users className="w-3 h-3" /> {hangout.responses?.filter(r => (r as any).status === 'coming').length ?? 0} coming
                         </span>
                       </div>
                     </div>
-                    <button type="button" onClick={() => closeMutation.mutate(hangout.id)} style={{ color: 'var(--neu-text-muted)' }}>
-                      <X className="w-4 h-4" />
-                    </button>
+                    {isOwner && (
+                      <button type="button" onClick={() => closeMutation.mutate(hangout.id)} title="End hangout" style={{ color: 'var(--neu-text-muted)' }}>
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
 
-                  {/* Join / Decline */}
-                  <div className="flex gap-2 mt-3">
-                    <NeuButton
-                      size="sm"
-                      variant="primary"
-                      className="flex-1"
-                      onClick={() => respondMutation.mutate({ id: hangout.id, status: 'coming' })}
-                      icon={<CheckCircle className="w-4 h-4" />}
-                    >
-                      Join
-                    </NeuButton>
-                    <NeuButton
-                      size="sm"
-                      variant="danger"
-                      className="flex-1"
-                      onClick={() => respondMutation.mutate({ id: hangout.id, status: 'not_coming' })}
-                    >
-                      Skip
-                    </NeuButton>
-                  </div>
+                  {/* Creator: you're going. Others: respond. Already responded: show status */}
+                  {isOwner ? (
+                    <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-neu-sm text-sm font-semibold" style={{ color: '#22c55e', background: '#22c55e18' }}>
+                      <CheckCircle className="w-4 h-4" /> You&apos;re going!
+                    </div>
+                  ) : myResponse ? (
+                    <div className="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-neu-sm text-sm" style={{ background: 'var(--neu-bg-card)' }}>
+                      <span style={{ color: myResponse.status === 'coming' ? '#22c55e' : myResponse.status === 'maybe' ? '#f59e0b' : '#ef4444' }}>
+                        {myResponse.status === 'coming' ? '✅ You\'re coming' : myResponse.status === 'maybe' ? '🤔 Maybe' : '❌ Not going'}
+                      </span>
+                      <button
+                        type="button"
+                        className="text-xs underline"
+                        style={{ color: 'var(--neu-text-muted)' }}
+                        onClick={() => respondMutation.mutate({ id: hangout.id, status: myResponse.status === 'coming' ? 'not_coming' : 'coming' })}
+                      >
+                        Change
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 mt-3">
+                      <NeuButton
+                        size="sm"
+                        variant="primary"
+                        className="flex-1"
+                        onClick={() => respondMutation.mutate({ id: hangout.id, status: 'coming' })}
+                        icon={<CheckCircle className="w-4 h-4" />}
+                      >
+                        Join
+                      </NeuButton>
+                      <NeuButton
+                        size="sm"
+                        variant="danger"
+                        className="flex-1"
+                        onClick={() => respondMutation.mutate({ id: hangout.id, status: 'not_coming' })}
+                      >
+                        Skip
+                      </NeuButton>
+                    </div>
+                  )}
                 </motion.div>
               );
             })}

@@ -15,6 +15,7 @@ interface HangoutState {
   type: HangoutType | null;
   activeEvent: HangoutEvent | null;
   pendingInvites: HangoutEvent[];
+  isCreator: boolean;
 
   openHangoutModal: (type: HangoutType) => void;
   openIncomingHangout: (event: HangoutEvent) => void;
@@ -31,18 +32,19 @@ export const useHangoutStore = create<HangoutState>((set, get) => ({
   type: null,
   activeEvent: null,
   pendingInvites: [],
+  isCreator: false,
 
-  openHangoutModal: (type) => set({ isOpen: true, type, activeEvent: null }),
+  openHangoutModal: (type) => set({ isOpen: true, type, activeEvent: null, isCreator: false }),
 
   openIncomingHangout: (event) =>
-    set({ isOpen: true, type: event.type, activeEvent: event }),
+    set({ isOpen: true, type: event.type, activeEvent: event, isCreator: false }),
 
-  close: () => set({ isOpen: false, activeEvent: null }),
+  close: () => set({ isOpen: false, activeEvent: null, isCreator: false }),
 
   startHangout: async (dto) => {
     const event = await hangoutApi.create(dto);
-    set({ activeEvent: event });
-    toast.success(`${dto.type === 'smoke_break' ? '🚬' : '🎉'} Invite sent!`);
+    set({ activeEvent: event, isCreator: true });
+    toast.success(`${dto.type === 'smoke_break' ? '🚬' : '🎉'} Invite sent to everyone!`);
   },
 
   respond: async (eventId, status, eta) => {
