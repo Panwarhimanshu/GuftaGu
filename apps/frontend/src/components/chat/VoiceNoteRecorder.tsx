@@ -17,7 +17,7 @@ export function VoiceNoteRecorder({ conversationId, onClose }: VoiceNoteRecorder
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   const startRecording = async () => {
     try {

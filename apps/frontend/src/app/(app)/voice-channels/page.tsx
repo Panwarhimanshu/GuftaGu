@@ -113,12 +113,12 @@ export default function VoiceChannelsPage() {
 
               return (
                 <motion.div
-                  key={channel._id}
+                  key={channel.id}
                   layout
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="neu-card p-5 cursor-pointer group"
-                  onClick={() => handleJoin(channel._id)}
+                  onClick={() => handleJoin(channel.id)}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -166,7 +166,7 @@ export default function VoiceChannelsPage() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    disabled={joining === channel._id}
+                    disabled={joining === channel.id}
                     className={`w-full py-2.5 rounded-xl font-medium text-sm transition-all ${
                       isActive
                         ? 'bg-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/30'
@@ -174,10 +174,10 @@ export default function VoiceChannelsPage() {
                     }`}
                     onClick={e => {
                       e.stopPropagation();
-                      handleJoin(channel._id);
+                      handleJoin(channel.id);
                     }}
                   >
-                    {joining === channel._id ? (
+                    {joining === channel.id ? (
                       <span className="flex items-center justify-center gap-2">
                         <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
