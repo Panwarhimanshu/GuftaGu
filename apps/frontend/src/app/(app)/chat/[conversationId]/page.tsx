@@ -35,7 +35,7 @@ export default function ChatPage({ params }: { params: Promise<{ conversationId:
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
-  const typingTimer = useRef<ReturnType<typeof setTimeout>>();
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Conversation info
   const { data: conversation } = useQuery({
