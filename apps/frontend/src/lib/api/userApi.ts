@@ -38,12 +38,26 @@ export const userApi = {
     return data;
   },
 
+  discoverUsers: async (): Promise<(User & { relationshipStatus: 'none' | 'friends' | 'request_sent' | 'request_received' })[]> => {
+    const { data } = await apiClient.get('/users/discover');
+    return data;
+  },
+
+  getFriendRequests: async (): Promise<User[]> => {
+    const { data } = await apiClient.get<User[]>('/users/me/friend-requests');
+    return data;
+  },
+
   sendFriendRequest: async (userId: string): Promise<void> => {
     await apiClient.post(`/users/${userId}/friend-request`);
   },
 
   acceptFriendRequest: async (userId: string): Promise<void> => {
     await apiClient.post(`/users/${userId}/friend-request/accept`);
+  },
+
+  declineFriendRequest: async (userId: string): Promise<void> => {
+    await apiClient.post(`/users/${userId}/friend-request/decline`);
   },
 
   blockUser: async (userId: string): Promise<void> => {

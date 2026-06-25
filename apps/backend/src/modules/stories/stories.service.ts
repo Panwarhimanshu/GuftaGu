@@ -14,12 +14,8 @@ export class StoriesService {
   ) {}
 
   async getFeed(userId: string): Promise<any[]> {
-    const user = await this.userModel.findById(userId).lean();
-    const friendIds = user?.friends ?? [];
-    const authorIds = [new Types.ObjectId(userId), ...friendIds];
-
     return this.storyModel
-      .find({ userId: { $in: authorIds }, expiresAt: { $gt: new Date() } })
+      .find({ expiresAt: { $gt: new Date() } })
       .populate('userId', 'displayName avatar username')
       .sort({ createdAt: -1 })
       .lean();

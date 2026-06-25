@@ -108,4 +108,56 @@ export class UsersService {
       $pull:     { friends: new Types.ObjectId(targetId) },
     });
   }
+
+  async discoverUsers(currentUserId: string): Promise<any[]> {
+    const currentUser = await this.userModel.findById(currentUserId).lean();
+    if (!currentUser) throw new NotFoundException();
+
+    const receivedFromIds = (currentUser.friendRequests ?? []).map(id => id.toString());
+    const friendIds       = (currentUser.friends       ?? []).map(id => id.toString());
+    const blockedIds      = (currentUser.blockedUsers  ?? []).map(id => id.toString());
+
+    // Users whose friendRequests array contains currentUserId → current user sent request to them
+    const sentToUsers = await this.userModel
+      .find({ friendRequests: new Types.ObjectId(currentUserId) })
+      .select('_id')
+      .lean();
+    const sentToIds = sentToUsers.map((u: any) => u._id.toString());
+
+    const excludeIds = [
+      new Types.ObjectId(currentUserId),
+      ...blockedIds.map(id => new Types.ObjectId(id)),
+    ];
+
+    const users = await this.userModel
+      .find({ _id: { $nin: excludeIds }, isBanned: false })
+      .select('displayName username avatar status isOnline lastSeen')
+      .sort({ isOnline: -1, displayName: 1 })
+      .lean();
+
+    return users.map((user: any) => {
+      const uid = user._id.toString();
+      let relationshipStatus: 'none' | 'friends' | 'request_sent' | 'request_received' = 'none';
+      if (friendIds.includes(uid))         relationshipStatus = 'friends';
+      else if (receivedFromIds.includes(uid)) relationshipStatus = 'request_received';
+      else if (sentToIds.includes(uid))    relationshipStatus = 'request_sent';
+      return { ...user, id: uid, relationshipStatus };
+    });
+  }
+
+  async getFriendRequests(userId: string): Promise<any[]> {
+    const user = await this.userModel.findById(userId).lean();
+    if (!user?.friendRequests?.length) return [];
+
+    return this.userModel
+      .find({ _id: { $in: user.friendRequests } })
+      .select('displayName username avatar status isOnline')
+      .lean();
+  }
+
+  async declineFriendRequest(userId: string, fromId: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      $pull: { friendRequests: new Types.ObjectId(fromId) },
+    });
+  }
 }

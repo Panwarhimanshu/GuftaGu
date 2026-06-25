@@ -24,6 +24,16 @@ export class UsersController {
     return this.usersService.getFriends(req.user._id.toString());
   }
 
+  @Get('discover')
+  discoverUsers(@Req() req: any) {
+    return this.usersService.discoverUsers(req.user._id.toString());
+  }
+
+  @Get('me/friend-requests')
+  getFriendRequests(@Req() req: any) {
+    return this.usersService.getFriendRequests(req.user._id.toString());
+  }
+
   @Get('search')
   searchUsers(@Query('q') query: string, @Req() req: any) {
     return this.usersService.searchUsers(query, req.user._id.toString());
@@ -61,6 +71,11 @@ export class UsersController {
   @Post(':id/friend-request/accept')
   acceptFriendRequest(@Param('id') id: string, @Req() req: any) {
     return this.usersService.acceptFriendRequest(req.user._id.toString(), id);
+  }
+
+  @Post(':id/friend-request/decline')
+  declineFriendRequest(@Param('id') id: string, @Req() req: any) {
+    return this.usersService.declineFriendRequest(req.user._id.toString(), id);
   }
 
   @Post(':id/block')

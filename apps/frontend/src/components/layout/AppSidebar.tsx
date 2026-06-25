@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageCircle, Home, Hash, Radio, Image as ImageIcon,
   Settings, LogOut, Bell, Moon, Sun, Users, Zap,
-  ChevronRight, Plus, Search
+  ChevronRight, Plus, Search, UserPlus
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Avatar } from '@/components/ui/Avatar';
@@ -15,6 +15,9 @@ import { useNotificationStore } from '@/store/notificationStore';
 import { useHangoutStore } from '@/store/hangoutStore';
 import { StatusSelector } from './StatusSelector';
 import { clsx } from 'clsx';
+import { useQuery } from '@tanstack/react-query';
+import { userApi } from '@/lib/api/userApi';
+import type { User } from '@memechat/shared';
 
 interface NavItem {
   href: string;
@@ -27,8 +30,9 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: '/',               icon: Home,          label: 'Home' },
   { href: '/chat',           icon: MessageCircle, label: 'Chats',   color: '#3b82f6' },
+  { href: '/people',         icon: UserPlus,      label: 'People',  color: '#22c55e' },
   { href: '/hangout',        icon: Zap,           label: 'Hangout', color: '#f59e0b' },
-  { href: '/voice-channels', icon: Radio,         label: 'Voice',   color: '#22c55e' },
+  { href: '/voice-channels', icon: Radio,         label: 'Voice',   color: '#6366f1' },
   { href: '/stories',        icon: Users,         label: 'Stories', color: '#a855f7' },
   { href: '/meme-feed',      icon: ImageIcon,     label: 'Memes',   color: '#ec4899' },
 ];
@@ -43,6 +47,13 @@ export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   const unreadNotifs = notifications.filter(n => !n.read).length;
+
+  const { data: friendRequests = [] } = useQuery<User[]>({
+    queryKey: ['friend-requests'],
+    queryFn: userApi.getFriendRequests,
+    refetchInterval: 30_000,
+  });
+  const pendingRequests = friendRequests.length;
 
   return (
     <motion.nav
@@ -159,6 +170,17 @@ export function AppSidebar() {
                 >
                   {item.badge}
                 </span>
+              )}
+              {item.href === '/people' && pendingRequests > 0 && (
+                collapsed ? (
+                  <span className="absolute top-1 right-1 w-4 h-4 rounded-full text-xs font-bold text-white flex items-center justify-center bg-red-500">
+                    {pendingRequests > 9 ? '9+' : pendingRequests}
+                  </span>
+                ) : (
+                  <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold text-white bg-red-500">
+                    {pendingRequests > 9 ? '9+' : pendingRequests}
+                  </span>
+                )
               )}
             </motion.button>
           );
