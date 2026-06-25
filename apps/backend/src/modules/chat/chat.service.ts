@@ -179,8 +179,8 @@ export class ChatService {
 
     // Push notification to offline participants
     const offlineParticipants = conv.participants
-      .filter(p => !p.userId.equals(new Types.ObjectId(senderId)))
-      .map(p => p.userId.toString());
+      .filter((p: any) => p.userId !== senderId)
+      .map((p: any) => p.userId);
 
     const sender = await this.userModel.findById(senderId).lean();
     await this.notificationsService.sendBulk(offlineParticipants, {
@@ -269,7 +269,7 @@ export class ChatService {
   async pinMessage(convId: string, userId: string, msgId: string): Promise<void> {
     const conv = await this.getConversation(convId, userId);
     const isAdmin = conv.participants.find(
-      p => p.userId.equals(new Types.ObjectId(userId)) && ['admin', 'moderator'].includes(p.role),
+      (p: any) => p.userId === userId && ['admin', 'moderator'].includes(p.role),
     );
     if (!isAdmin && conv.type !== 'private') throw new ForbiddenException();
 

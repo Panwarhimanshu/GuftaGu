@@ -124,31 +124,26 @@ function useVoiceRoom(channelId: string | null) {
       });
     })();
 
-    // New user joined → create offer to them
-    const onUserJoined = async (data: VoicePeer) => {
+    // New user joined → update participants list ONLY; the new joiner will send offers to us
+    const onUserJoined = (data: { socketId: string; userId: string; displayName: string; channelId: string }) => {
       if (data.userId === user?.id) return;
-      setParticipants(prev => [...prev.filter(p => p.socketId !== data.socketId), { ...data, isSpeaking: false }]);
-
-      const pc    = createPeer(data.socketId);
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      socket.emit('voice:offer', { to: data.socketId, offer, channelId });
+      setParticipants(prev => [
+        ...prev.filter(p => p.socketId !== data.socketId),
+        { socketId: data.socketId, userId: data.userId, displayName: data.displayName, isSpeaking: false },
+      ]);
     };
 
-    // Receive offer → send answer
-    const onOffer = async ({ from, fromUserId, offer }: any) => {
+    // Receive offer from new joiner → answer (never initiate here; avoids WebRTC glare)
+    const onOffer = async ({ from, offer }: any) => {
       let pc = peers.current.get(from);
       if (!pc) pc = createPeer(from);
-      await pc.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      socket.emit('voice:answer', { to: from, answer });
-
-      if (!participants.some(p => p.socketId === from)) {
-        setParticipants(prev => [
-          ...prev.filter(p => p.socketId !== from),
-          { socketId: from, userId: fromUserId, displayName: '...', isSpeaking: false },
-        ]);
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket.emit('voice:answer', { to: from, answer });
+      } catch (err) {
+        console.warn('voice:offer handling error', err);
       }
     };
 
