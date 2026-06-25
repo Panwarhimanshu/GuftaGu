@@ -53,7 +53,7 @@ export function RecentChats() {
     <div className="space-y-1">
       {conversations.map((conv, i) => {
         const otherUser = conv.type === 'private'
-          ? conv.participants.find(p => p.userId !== user?.id)?.user
+          ? conv.participants?.find(p => p.userId !== user?.id)?.user
           : null;
         const name = conv.type === 'private' ? otherUser?.displayName : conv.name;
         const avatar = conv.type === 'private' ? otherUser?.avatar : conv.avatar;

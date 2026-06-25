@@ -149,7 +149,7 @@ export default function ChatPage({ params }: { params: Promise<{ conversationId:
   };
 
   const otherParticipant = conversation?.participants
-    .find(p => p.userId !== user?.id)?.user;
+    ?.find(p => p.userId !== user?.id)?.user;
 
   return (
     <div className="flex flex-col h-full" style={{ background: 'var(--neu-bg)' }}>
@@ -186,7 +186,7 @@ export default function ChatPage({ params }: { params: Promise<{ conversationId:
                 ? otherParticipant?.isOnline
                   ? '🟢 Online'
                   : `Last seen ${otherParticipant?.lastSeen ? formatDistanceToNow(new Date(otherParticipant.lastSeen), { addSuffix: true }) : 'a while ago'}`
-                : `${conversation?.participants.length} members`}
+                : `${conversation?.participants?.length ?? 0} members`}
             </p>
           </div>
         </div>

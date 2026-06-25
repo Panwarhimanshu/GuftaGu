@@ -21,8 +21,37 @@ export class ChatService {
   ) {}
 
   // ── Conversations ─────────────────────────────────────────
+
+  /** Normalize a lean conversation: split populated userId into userId (string) + user (object) */
+  private normalizeConv(conv: any): any {
+    return {
+      ...conv,
+      id:          conv._id?.toString() ?? conv.id,
+      unreadCount: conv.unreadCount ?? 0,
+      isPinned:    conv.isPinned    ?? false,
+      isMuted:     conv.isMuted     ?? false,
+      isArchived:  conv.isArchived  ?? false,
+      participants: (conv.participants ?? []).map((p: any) => {
+        const userObj = p.userId && typeof p.userId === 'object' ? p.userId : null;
+        return {
+          ...p,
+          userId: userObj?._id?.toString() ?? userObj?.id ?? p.userId?.toString?.() ?? p.userId,
+          user: userObj ? {
+            id:          userObj._id?.toString() ?? userObj.id,
+            displayName: userObj.displayName,
+            username:    userObj.username,
+            avatar:      userObj.avatar,
+            status:      userObj.status,
+            isOnline:    userObj.isOnline,
+            lastSeen:    userObj.lastSeen,
+          } : undefined,
+        };
+      }),
+    };
+  }
+
   async getConversations(userId: string): Promise<any[]> {
-    return this.convModel
+    const convs = await this.convModel
       .find({ 'participants.userId': new Types.ObjectId(userId) })
       .sort({ updatedAt: -1 })
       .populate('participants.userId', 'displayName avatar username status isOnline lastSeen')
@@ -31,36 +60,46 @@ export class ChatService {
         populate: { path: 'senderId', select: 'displayName avatar' },
       })
       .lean();
+    return convs.map(c => this.normalizeConv(c));
   }
 
-  async getConversation(convId: string, userId: string): Promise<ConversationDocument> {
+  async getConversation(convId: string, userId: string): Promise<any> {
     const conv = await this.convModel
       .findById(convId)
-      .populate('participants.userId', 'displayName avatar username status isOnline lastSeen');
+      .populate('participants.userId', 'displayName avatar username status isOnline lastSeen')
+      .lean();
 
     if (!conv) throw new NotFoundException('Conversation not found');
-    const isMember = conv.participants.some(p => p.userId.equals(new Types.ObjectId(userId)));
+    const normalized = this.normalizeConv(conv);
+    const isMember = normalized.participants.some((p: any) => p.userId === userId);
     if (!isMember) throw new ForbiddenException();
-    return conv;
+    return normalized;
   }
 
-  async createPrivate(userId: string, targetId: string): Promise<ConversationDocument> {
-    const existing = await this.convModel.findOne({
+  async createPrivate(userId: string, targetId: string): Promise<any> {
+    let conv = await this.convModel.findOne({
       type: 'private',
       'participants.userId': {
         $all: [new Types.ObjectId(userId), new Types.ObjectId(targetId)],
       },
     });
-    if (existing) return existing;
 
-    return this.convModel.create({
-      type: 'private',
-      participants: [
-        { userId: new Types.ObjectId(userId),   role: 'member' },
-        { userId: new Types.ObjectId(targetId), role: 'member' },
-      ],
-      createdBy: new Types.ObjectId(userId),
-    });
+    if (!conv) {
+      conv = await this.convModel.create({
+        type: 'private',
+        participants: [
+          { userId: new Types.ObjectId(userId),   role: 'member' },
+          { userId: new Types.ObjectId(targetId), role: 'member' },
+        ],
+        createdBy: new Types.ObjectId(userId),
+      });
+    }
+
+    const populated = await this.convModel
+      .findById(conv._id)
+      .populate('participants.userId', 'displayName avatar username status isOnline lastSeen')
+      .lean();
+    return this.normalizeConv(populated);
   }
 
   async createGroup(userId: string, dto: { name: string; participantIds: string[]; avatar?: string }) {
