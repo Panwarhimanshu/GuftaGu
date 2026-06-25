@@ -2,12 +2,12 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy workspace manifests
-COPY package.json package-lock.json turbo.json ./
+COPY package.json turbo.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/backend/package.json    ./apps/backend/
 
-# Install all workspace deps
-RUN npm ci --ignore-scripts
+# Install all workspace deps (skip husky/prepare hooks)
+RUN npm install --ignore-scripts
 
 # Copy source
 COPY packages/shared ./packages/shared
