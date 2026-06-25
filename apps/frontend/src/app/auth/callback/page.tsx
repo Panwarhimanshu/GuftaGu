@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Loader2, MessageCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/lib/api/authApi';
 
-export default function AuthCallbackPage() {
+function CallbackInner() {
   const router = useRouter();
   const params = useSearchParams();
   const { setTokens, setUser } = useAuthStore();
@@ -23,7 +23,6 @@ export default function AuthCallbackPage() {
 
     setTokens(accessToken, refreshToken);
 
-    // Fetch the user profile with the new token
     authApi.me()
       .then((user) => {
         setUser(user);
@@ -34,6 +33,10 @@ export default function AuthCallbackPage() {
       });
   }, [params, router, setTokens, setUser]);
 
+  return null;
+}
+
+function LoadingUI() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center gap-4"
@@ -55,5 +58,14 @@ export default function AuthCallbackPage() {
         Signing you in…
       </p>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<LoadingUI />}>
+      <LoadingUI />
+      <CallbackInner />
+    </Suspense>
   );
 }
