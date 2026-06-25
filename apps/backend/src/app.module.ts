@@ -1,4 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { HealthController } from './health.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -21,6 +22,7 @@ import { StorageModule }       from './modules/storage/storage.module';
 import { GatewayModule }       from './gateway/gateway.module';
 
 @Module({
+  controllers: [HealthController],
   imports: [
     // ── Config ──────────────────────────────────────────────
     ConfigModule.forRoot({
