@@ -41,7 +41,8 @@ const PROVIDERS = [
 
 export function SocialLoginButtons() {
   const handleSocialLogin = (provider: string) => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/${provider}`;
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/^﻿/, '');
+    window.location.href = `${apiUrl}/auth/${provider}`;
   };
 
   return (
