@@ -14,6 +14,7 @@ import { StoriesModule }       from './modules/stories/stories.module';
 import { MemeFeedModule }      from './modules/meme-feed/meme-feed.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { CallsModule }         from './modules/calls/calls.module';
+import { VoiceChannelsModule } from './modules/voice-channels/voice-channels.module';
 import { AdminModule }         from './modules/admin/admin.module';
 import { AiModule }            from './modules/ai/ai.module';
 import { StorageModule }       from './modules/storage/storage.module';
@@ -69,6 +70,7 @@ import { GatewayModule }       from './gateway/gateway.module';
     MemeFeedModule,
     NotificationsModule,
     CallsModule,
+    VoiceChannelsModule,
     AdminModule,
     AiModule,
     StorageModule,

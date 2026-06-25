@@ -28,6 +28,9 @@ export class EventsGateway
   // userId → Set of socket IDs
   private onlineUsers = new Map<string, Set<string>>();
 
+  // channelId → Map<socketId, { userId, displayName }>
+  private voiceRooms = new Map<string, Map<string, { userId: string; displayName: string }>>();
+
   constructor(
     private jwtService: JwtService,
     @InjectModel(User.name)    private userModel:    Model<UserDocument>,
@@ -105,7 +108,118 @@ export class EventsGateway
       });
     }
 
+    // Clean up voice rooms
+    this.voiceRooms.forEach((participants, channelId) => {
+      if (participants.has(socket.id)) {
+        participants.delete(socket.id);
+        this.server.to(`voice:${channelId}`).emit('voice:user-left', {
+          channelId,
+          socketId: socket.id,
+          userId:   socket.userId,
+        });
+      }
+    });
+
     this.logger.log(`Socket disconnected: ${socket.id}`);
+  }
+
+  // ── Voice channel WebRTC signaling ────────────────────────
+  @SubscribeMessage('voice:join')
+  handleVoiceJoin(
+    @ConnectedSocket() socket: AuthSocket,
+    @MessageBody() data: { channelId: string },
+  ) {
+    const { channelId } = data;
+    const room = `voice:${channelId}`;
+
+    if (!this.voiceRooms.has(channelId)) {
+      this.voiceRooms.set(channelId, new Map());
+    }
+    const participants = this.voiceRooms.get(channelId)!;
+
+    // Give the new joiner the current participant list
+    const currentUsers = Array.from(participants.entries()).map(([sid, info]) => ({
+      socketId:    sid,
+      userId:      info.userId,
+      displayName: info.displayName,
+    }));
+    socket.emit('voice:room-users', { channelId, users: currentUsers });
+
+    // Track & join room
+    participants.set(socket.id, {
+      userId:      socket.userId,
+      displayName: socket.user?.displayName ?? 'Unknown',
+    });
+    socket.join(room);
+
+    // Tell everyone else
+    socket.to(room).emit('voice:user-joined', {
+      channelId,
+      socketId:    socket.id,
+      userId:      socket.userId,
+      displayName: socket.user?.displayName ?? 'Unknown',
+    });
+  }
+
+  @SubscribeMessage('voice:leave')
+  handleVoiceLeave(
+    @ConnectedSocket() socket: AuthSocket,
+    @MessageBody() data: { channelId: string },
+  ) {
+    const { channelId } = data;
+    this.voiceRooms.get(channelId)?.delete(socket.id);
+    socket.leave(`voice:${channelId}`);
+    socket.to(`voice:${channelId}`).emit('voice:user-left', {
+      channelId,
+      socketId: socket.id,
+      userId:   socket.userId,
+    });
+  }
+
+  @SubscribeMessage('voice:offer')
+  handleVoiceOffer(
+    @ConnectedSocket() socket: AuthSocket,
+    @MessageBody() data: { to: string; offer: RTCSessionDescriptionInit; channelId: string },
+  ) {
+    this.server.to(data.to).emit('voice:offer', {
+      from:        socket.id,
+      fromUserId:  socket.userId,
+      offer:       data.offer,
+      channelId:   data.channelId,
+    });
+  }
+
+  @SubscribeMessage('voice:answer')
+  handleVoiceAnswer(
+    @ConnectedSocket() socket: AuthSocket,
+    @MessageBody() data: { to: string; answer: RTCSessionDescriptionInit },
+  ) {
+    this.server.to(data.to).emit('voice:answer', {
+      from:   socket.id,
+      answer: data.answer,
+    });
+  }
+
+  @SubscribeMessage('voice:ice-candidate')
+  handleVoiceIce(
+    @ConnectedSocket() socket: AuthSocket,
+    @MessageBody() data: { to: string; candidate: RTCIceCandidateInit },
+  ) {
+    this.server.to(data.to).emit('voice:ice-candidate', {
+      from:      socket.id,
+      candidate: data.candidate,
+    });
+  }
+
+  // Return participant list for a channel (REST helper)
+  getVoiceRoomParticipants(channelId: string) {
+    const participants = this.voiceRooms.get(channelId);
+    if (!participants) return [];
+    return Array.from(participants.entries()).map(([sid, info]) => ({
+      socketId:    sid,
+      userId:      info.userId,
+      displayName: info.displayName,
+    }));
   }
 
   // ── Room management ───────────────────────────────────────
