@@ -17,6 +17,10 @@ COPY apps/backend    ./apps/backend
 RUN cd packages/shared && npx tsc
 RUN cd apps/backend && npx nest build
 
+# Replace the broken workspace symlink with real files so COPY works across stages
+RUN rm -rf node_modules/@memechat/shared && \
+    cp -r packages/shared node_modules/@memechat/shared
+
 # ── Runtime ──────────────────────────────────────────────────
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -26,9 +30,9 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nestjs && \
     adduser  --system --uid 1001 nestjs
 
+# node_modules now has real @memechat/shared files (not a broken symlink)
 COPY --from=builder /app/node_modules        ./node_modules
 COPY --from=builder /app/apps/backend/dist   ./dist
-COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 
 RUN chown -R nestjs:nestjs /app
 USER nestjs
