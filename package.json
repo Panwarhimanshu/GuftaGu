@@ -1,0 +1,42 @@
+{
+  "name": "memechat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MemeChat - Social Hangout & Real-Time Communication Platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"yarn workspace @memechat/frontend dev\" \"yarn workspace @memechat/backend start:dev\"",
+    "dev:frontend": "yarn workspace @memechat/frontend dev",
+    "dev:backend": "yarn workspace @memechat/backend start:dev",
+    "build": "yarn workspaces run build",
+    "build:frontend": "yarn workspace @memechat/frontend build",
+    "build:backend": "yarn workspace @memechat/backend build",
+    "test": "yarn workspaces run test",
+    "test:e2e": "yarn workspaces run test:e2e",
+    "lint": "yarn workspaces run lint",
+    "format": "yarn workspaces run format",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:prod": "docker-compose -f docker-compose.yml up -d",
+    "docker:build": "docker-compose build",
+    "db:seed": "yarn workspace @memechat/backend db:seed",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.5",
+    "turbo": "^2.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": ["prettier --write", "eslint --fix"],
+    "*.{json,md,yml,yaml}": ["prettier --write"]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "yarn": ">=1.22.0"
+  }
+}

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="100%" stop-color="#111111"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5d97a"/>
+      <stop offset="40%" stop-color="#c9972a"/>
+      <stop offset="70%" stop-color="#e8b84b"/>
+      <stop offset="100%" stop-color="#a0721a"/>
+    </linearGradient>
+    <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#d0d0d0"/>
+      <stop offset="100%" stop-color="#a8a8a8"/>
+    </linearGradient>
+    <linearGradient id="goldText" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5d97a"/>
+      <stop offset="50%" stop-color="#c9972a"/>
+      <stop offset="100%" stop-color="#e8b84b"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="512" height="512" rx="100" ry="100" fill="url(#bgGrad)"/>
+
+  <!-- Gold border -->
+  <rect width="512" height="512" rx="100" ry="100" fill="none" stroke="url(#goldGrad)" stroke-width="8"/>
+
+  <!-- Silver outer arc (left G shape) -->
+  <path d="M 148 170 A 108 108 0 1 0 256 368 L 256 336 A 76 76 0 1 1 227 201 Z"
+        fill="url(#silverGrad)" filter="url(#shadow)"/>
+
+  <!-- Gold inner arc (right cutout of G) -->
+  <path d="M 256 156 A 108 108 0 0 1 364 256 L 332 256 A 76 76 0 0 0 256 188 Z"
+        fill="url(#goldGrad)" filter="url(#shadow)"/>
+
+  <!-- Gold horizontal bar of G -->
+  <path d="M 256 242 L 344 242 L 344 270 L 256 270 Z"
+        fill="url(#goldGrad)" filter="url(#shadow)"/>
+
+  <!-- Three gold dots (chat indicator) -->
+  <circle cx="218" cy="252" r="12" fill="url(#goldGrad)" filter="url(#shadow)"/>
+  <circle cx="252" cy="248" r="10" fill="url(#goldGrad)" filter="url(#shadow)"/>
+  <circle cx="284" cy="244" r="8"  fill="url(#goldGrad)" filter="url(#shadow)"/>
+
+  <!-- App name: Gufta in silver/white -->
+  <text x="105" y="426" font-family="Georgia, serif" font-weight="700" font-size="64"
+        fill="url(#silverGrad)" filter="url(#shadow)" letter-spacing="1">Gufta</text>
+
+  <!-- App name: Gu in gold -->
+  <text x="318" y="426" font-family="Georgia, serif" font-weight="700" font-size="64"
+        fill="url(#goldGrad)" filter="url(#shadow)" letter-spacing="1">Gu</text>
+
+  <!-- Tagline -->
+  <text x="256" y="468" font-family="Arial, sans-serif" font-weight="400" font-size="22"
+        fill="#c9972a" text-anchor="middle" letter-spacing="4">TALK · SHARE · HANGOUT</text>
+</svg>

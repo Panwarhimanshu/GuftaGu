@@ -1,0 +1,318 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────
+   MEMECHAT — GLOBAL STYLES
+   Neumorphism Design System
+   ───────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── CSS Variables ───────────────────────────────────────────── */
+:root {
+  /* Light mode neumorphism */
+  --neu-bg:       #e8e8eb;
+  --neu-bg-card:  #efefef;
+  --neu-shadow-1: #b8b9be;
+  --neu-shadow-2: #ffffff;
+  --neu-text:     #2a2a30;
+  --neu-text-muted: #6c6c78;
+  --neu-border:   rgba(255, 255, 255, 0.6);
+
+  /* Brand */
+  --brand:        #3b82f6;
+  --brand-dark:   #2563eb;
+  --accent:       #a855f7;
+
+  /* Status */
+  --status-online:  #22c55e;
+  --status-busy:    #ef4444;
+  --status-away:    #f59e0b;
+  --status-offline: #6b7280;
+
+  /* Transitions */
+  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+  /* Dark mode neumorphism */
+  --neu-bg:       #1c1c22;
+  --neu-bg-card:  #1f1f25;
+  --neu-shadow-1: #141416;
+  --neu-shadow-2: #26262e;
+  --neu-text:     #e8e8eb;
+  --neu-text-muted: #8e8e98;
+  --neu-border:   rgba(255, 255, 255, 0.06);
+}
+
+/* ── Base Reset ──────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--neu-bg);
+  color: var(--neu-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  overflow-x: hidden;
+  transition: background var(--transition-slow), color var(--transition-slow);
+}
+
+/* ── Neumorphism Component Classes ───────────────────────────── */
+@layer components {
+
+  /* ─ Surfaces ─ */
+  .neu-surface {
+    @apply rounded-neu transition-all duration-200;
+    background: var(--neu-bg);
+    box-shadow: 6px 6px 12px var(--neu-shadow-1), -6px -6px 12px var(--neu-shadow-2);
+  }
+
+  .neu-surface-sm {
+    @apply rounded-neu-sm transition-all duration-200;
+    background: var(--neu-bg);
+    box-shadow: 3px 3px 6px var(--neu-shadow-1), -3px -3px 6px var(--neu-shadow-2);
+  }
+
+  .neu-surface-lg {
+    @apply rounded-neu-lg transition-all duration-200;
+    background: var(--neu-bg);
+    box-shadow: 10px 10px 20px var(--neu-shadow-1), -10px -10px 20px var(--neu-shadow-2);
+  }
+
+  .neu-card {
+    @apply rounded-neu-lg transition-all duration-200;
+    background: var(--neu-bg-card);
+    box-shadow: 8px 8px 16px var(--neu-shadow-1), -8px -8px 16px var(--neu-shadow-2);
+  }
+
+  /* ─ Pressed / Inset ─ */
+  .neu-pressed {
+    @apply rounded-neu;
+    background: var(--neu-bg);
+    box-shadow: inset 4px 4px 8px var(--neu-shadow-1), inset -4px -4px 8px var(--neu-shadow-2);
+  }
+
+  .neu-pressed-sm {
+    @apply rounded-neu-sm;
+    background: var(--neu-bg);
+    box-shadow: inset 2px 2px 5px var(--neu-shadow-1), inset -2px -2px 5px var(--neu-shadow-2);
+  }
+
+  /* ─ Buttons ─ */
+  .neu-btn {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-neu font-medium transition-all duration-150 select-none cursor-pointer;
+    background: var(--neu-bg);
+    box-shadow: 5px 5px 10px var(--neu-shadow-1), -5px -5px 10px var(--neu-shadow-2);
+  }
+
+  .neu-btn:hover {
+    box-shadow: 7px 7px 14px var(--neu-shadow-1), -7px -7px 14px var(--neu-shadow-2);
+  }
+
+  .neu-btn:active {
+    box-shadow: inset 4px 4px 8px var(--neu-shadow-1), inset -4px -4px 8px var(--neu-shadow-2);
+    transform: scale(0.98);
+  }
+
+  .neu-btn-primary {
+    @apply neu-btn text-white;
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    box-shadow: 5px 5px 10px var(--neu-shadow-1), -5px -5px 10px var(--neu-shadow-2), 0 0 20px rgba(59,130,246,0.3);
+  }
+
+  .neu-btn-primary:hover {
+    box-shadow: 7px 7px 14px var(--neu-shadow-1), -7px -7px 14px var(--neu-shadow-2), 0 0 30px rgba(59,130,246,0.4);
+  }
+
+  .neu-btn-accent {
+    @apply neu-btn text-white;
+    background: linear-gradient(135deg, #a855f7, #9333ea);
+    box-shadow: 5px 5px 10px var(--neu-shadow-1), -5px -5px 10px var(--neu-shadow-2), 0 0 20px rgba(168,85,247,0.3);
+  }
+
+  .neu-btn-danger {
+    @apply neu-btn text-white;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 5px 5px 10px var(--neu-shadow-1), -5px -5px 10px var(--neu-shadow-2), 0 0 20px rgba(239,68,68,0.3);
+  }
+
+  .neu-btn-icon {
+    @apply neu-btn p-2.5 rounded-neu;
+  }
+
+  /* ─ Inputs ─ */
+  .neu-input {
+    @apply w-full rounded-neu px-4 py-3 text-sm font-medium outline-none transition-all duration-200;
+    background: var(--neu-bg);
+    color: var(--neu-text);
+    box-shadow: inset 4px 4px 8px var(--neu-shadow-1), inset -4px -4px 8px var(--neu-shadow-2);
+    border: 1px solid transparent;
+  }
+
+  .neu-input:focus {
+    border-color: var(--brand);
+    box-shadow: inset 4px 4px 8px var(--neu-shadow-1), inset -4px -4px 8px var(--neu-shadow-2), 0 0 0 2px rgba(59,130,246,0.15);
+  }
+
+  .neu-input::placeholder {
+    color: var(--neu-text-muted);
+    opacity: 0.7;
+  }
+
+  /* ─ Avatar ─ */
+  .neu-avatar {
+    @apply rounded-full object-cover;
+    box-shadow: 3px 3px 6px var(--neu-shadow-1), -3px -3px 6px var(--neu-shadow-2);
+  }
+
+  /* ─ Badge ─ */
+  .neu-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    background: var(--neu-bg);
+    box-shadow: 2px 2px 4px var(--neu-shadow-1), -2px -2px 4px var(--neu-shadow-2);
+  }
+
+  /* ─ Divider ─ */
+  .neu-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--neu-shadow-1), transparent);
+  }
+
+  /* ─ Sidebar ─ */
+  .neu-sidebar {
+    @apply h-full transition-all duration-300;
+    background: var(--neu-bg);
+    box-shadow: 8px 0 20px var(--neu-shadow-1);
+  }
+
+  /* ─ Message Bubble ─ */
+  .msg-bubble-own {
+    @apply rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xs lg:max-w-md text-sm;
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    color: #fff;
+    box-shadow: 4px 4px 10px var(--neu-shadow-1), -2px -2px 6px var(--neu-shadow-2);
+  }
+
+  .msg-bubble-other {
+    @apply rounded-2xl rounded-bl-sm px-4 py-2.5 max-w-xs lg:max-w-md text-sm;
+    background: var(--neu-bg-card);
+    color: var(--neu-text);
+    box-shadow: 4px 4px 10px var(--neu-shadow-1), -2px -2px 6px var(--neu-shadow-2);
+  }
+
+  /* ─ Hangout Button ─ */
+  .hangout-btn {
+    @apply relative flex flex-col items-center gap-2 p-4 rounded-neu-lg cursor-pointer transition-all duration-200 select-none;
+    background: var(--neu-bg);
+    box-shadow: 6px 6px 12px var(--neu-shadow-1), -6px -6px 12px var(--neu-shadow-2);
+  }
+
+  .hangout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 8px 8px 16px var(--neu-shadow-1), -8px -8px 16px var(--neu-shadow-2);
+  }
+
+  .hangout-btn:active {
+    transform: scale(0.96);
+    box-shadow: inset 4px 4px 8px var(--neu-shadow-1), inset -4px -4px 8px var(--neu-shadow-2);
+  }
+
+  /* ─ Story Ring ─ */
+  .story-ring {
+    @apply rounded-full;
+    background: linear-gradient(45deg, #f97316, #ec4899, #8b5cf6, #3b82f6);
+    padding: 2px;
+  }
+
+  .story-ring-seen {
+    background: linear-gradient(45deg, #6b7280, #4b5563);
+    padding: 2px;
+  }
+
+  /* ─ Voice Waveform ─ */
+  .voice-bar {
+    @apply rounded-full;
+    background: linear-gradient(to top, var(--brand), var(--accent));
+    animation: voiceBar 1s ease-in-out infinite;
+  }
+
+  /* ─ Typing Indicator ─ */
+  .typing-dot {
+    @apply w-2 h-2 rounded-full;
+    background: var(--neu-text-muted);
+    animation: typingBounce 1.2s ease-in-out infinite;
+  }
+
+  .typing-dot:nth-child(1) { animation-delay: 0s; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* ─ Online Indicator ─ */
+  .online-dot {
+    @apply absolute bottom-0 right-0 w-3 h-3 rounded-full border-2;
+    background: var(--status-online);
+    border-color: var(--neu-bg);
+  }
+
+  /* ─ Scrollbar ─ */
+  .neu-scroll::-webkit-scrollbar { width: 4px; }
+  .neu-scroll::-webkit-scrollbar-track { background: transparent; }
+  .neu-scroll::-webkit-scrollbar-thumb {
+    background: var(--neu-shadow-1);
+    border-radius: 2px;
+  }
+  .neu-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--neu-text-muted);
+  }
+}
+
+/* ── Keyframe Animations ──────────────────────────────────────── */
+@keyframes typingBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes voiceBar {
+  0%, 100% { transform: scaleY(0.3); opacity: 0.6; }
+  50%       { transform: scaleY(1);   opacity: 1; }
+}
+
+@keyframes presence-ping {
+  0%   { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* ── Media Queries ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Selection ───────────────────────────────────────────────── */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: var(--neu-text);
+}
+
+/* ── Scrollbar (Firefox) ─────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--neu-shadow-1) transparent;
+}
